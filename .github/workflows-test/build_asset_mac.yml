@@ -1,0 +1,26 @@
+name: Build asset on macOS
+
+on: [push]
+
+jobs:
+  build_asset_mac:
+    name: Build asset on macOS
+    runs-on: macos-10.15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Dependency
+        run: |
+          brew install coreutils automake
+
+      - name: Install Ruby
+        uses: ruby/setup-ruby@v1.82.0
+        with:
+          ruby-version: 2.7
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+
+      - name: Run Buildscript
+        run: |
+          bundle exec rake update_library_macos
+

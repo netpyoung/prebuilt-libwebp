@@ -1,0 +1,26 @@
+name: Build asset on Linux (Android)
+
+on: [push]
+
+jobs:
+  build_asset_linux:
+    name: Build asset on Linux (Android)
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1.0.6
+        with:
+          ndk-version: r21e
+
+      - name: Install Ruby
+        uses: ruby/setup-ruby@v1.82.0
+        with:
+          ruby-version: 2.7
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+
+      - name: Run Buildscript
+        run: |
+          bundle exec rake update_library_linux

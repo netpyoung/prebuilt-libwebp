@@ -1,0 +1,246 @@
+name: Release with Tag
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+
+  ## ======================================================================================================
+  release:
+    name: Write Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get Tagname
+        id: tag_name
+        run: |
+          echo ::set-output name=current_version::${GITHUB_REF#refs/tags/v}
+        shell: bash
+
+      - name: Changelog Reader
+        id: changelog_reader
+        uses: mindsers/changelog-reader-action@v2
+        with:
+          version: ${{ steps.tag_name.outputs.current_version }}
+          path: ./CHANGELOG.md
+
+      - name: Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ github.ref }}
+          tag_name: ${{ github.ref }}
+          body: ${{ steps.changelog_reader.outputs.changes }}
+
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+
+  ## ======================================================================================================
+  upload_asset_windows:
+    needs: release
+    name: Upload Asset on Windows
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Ruby
+        uses: ruby/setup-ruby@v1.82.0
+        with:
+          ruby-version: 2.7
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+
+      - name: Remove Name Conflict
+        shell: pwsh
+        run: mv C:\msys64\usr\bin\link.exe C:\msys64\usr\bin\msys-link.exe
+
+      - name: Run Buildscript
+        run: bundle exec rake prepare_library_windows
+
+      - name: Install Dependency x86_64
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+            arch: x86_64
+      - name: Run Buildscript (x86_64)
+        run: bundle exec rake update_library_windows_x64
+
+      - name: Install Dependency x86
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+            arch: x86
+      - name: Run Buildscript (x86)
+        run: bundle exec rake update_library_windows_x86
+
+      - name: Install Dependency x86_arm64
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+            arch: x86_arm64
+      - name: Run Buildscript (x86_arm64)
+        run: bundle exec rake update_library_windows_arm64
+
+      - name: Run Zip
+        run: bundle exec rake zip_library
+
+      - name: Print MD5
+        run: bundle exec rake print_lib_md5
+
+      - name: Upload Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: ./lib.zip
+          asset_name: windows.zip
+          asset_content_type: application/octet-stream
+
+  ## ======================================================================================================
+  upload_asset_linux:
+    needs: release
+    name: Upload Asset on Linux
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Ruby
+        uses: ruby/setup-ruby@v1.82.0
+        with:
+          ruby-version: 2.7
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+
+      - name: Run Buildscript
+        run: |
+          bundle exec rake update_library_linux
+          bundle exec rake zip_library
+
+      - name: Print MD5
+        run: bundle exec rake print_lib_md5
+
+      - name: Upload Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: ./lib.zip
+          asset_name: linux.zip
+          asset_content_type: application/octet-stream
+
+  ## ======================================================================================================
+  upload_asset_android:
+    needs: release
+    name: Upload Asset on Linux (Android)
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1.0.6
+        with:
+          ndk-version: r21e
+
+      - name: Install Ruby
+        uses: ruby/setup-ruby@v1.82.0
+        with:
+          ruby-version: 2.7
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+
+      - name: Run Buildscript
+        run: |
+          bundle exec rake update_library_android
+          bundle exec rake zip_library
+
+      - name: Print MD5
+        run: bundle exec rake print_lib_md5
+
+      - name: Upload Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: ./lib.zip
+          asset_name: android.zip
+          asset_content_type: application/octet-stream
+
+  ## ======================================================================================================
+  upload_asset_macos:
+    needs: release
+    name: Upload Asset on macOS
+    runs-on: macos-10.15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Dependency
+        run: brew install coreutils automake
+
+      - name: Install Ruby
+        uses: ruby/setup-ruby@v1.82.0
+        with:
+          ruby-version: 2.7
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+
+      - name: Run Buildscript
+        run: |
+          bundle exec rake update_library_macos
+          bundle exec rake zip_library
+
+      - name: Print MD5
+        run: bundle exec rake print_lib_md5
+
+      - name: Upload Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: ./lib.zip
+          asset_name: macos.zip
+          asset_content_type: application/octet-stream
+
+  ## ======================================================================================================
+  upload_asset_ios:
+    needs: release
+    name: Upload Asset on macOS (iOS)
+    runs-on: macos-10.15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Dependency
+        run: brew install coreutils automake
+
+      - name: Install Ruby
+        uses: ruby/setup-ruby@v1.82.0
+        with:
+          ruby-version: 2.7
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+
+      - name: Run Buildscript
+        run: |
+          bundle exec rake update_library_ios
+          bundle exec rake zip_library
+
+      - name: Print MD5
+        run: bundle exec rake print_lib_md5
+
+      - name: Upload Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: ./lib.zip
+          asset_name: ios.zip
+          asset_content_type: application/octet-stream
