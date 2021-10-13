@@ -8,7 +8,7 @@
 | Platforms | Arch        | action  | device tested? |
 | --------- | ----------- | ------- | -------------- |
 | Windows   | x86         | o       | not yet        |
-| Windows   | x86_64      | o       | not yet        |
+| Windows   | x86_64      | o       | tested         |
 | Windows   | x86_arm64   | o       | not yet        |
 | Linux     | x86_64      | o       | not yet        |
 | macOS     | x86_64      | o       | not yet        |
