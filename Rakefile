@@ -2,7 +2,7 @@ require 'zip'
 require 'digest/md5'
 
 GIT_ROOT = `git rev-parse --show-toplevel`.strip
-VERSION = '1.0.0'
+VERSION = 'v1.2.1'
 LIBWEBP = "libwebp"
 
 desc "default"

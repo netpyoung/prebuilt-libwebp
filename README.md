@@ -2,7 +2,8 @@
 
 :package: Prebuilt native libwebp for Unity3D
 
-- Prebuilt native libwebp library for Unity3D.
+- [webp](https://developers.google.com/speed/webp) wrapper
+- Prebuilt native [libwebp](https://github.com/webmproject/libwebp) library for Unity3D.
 - try [unity.webp](https://github.com/netpyoung/unity.webp).
 
 | Platforms | Arch        | action  | device tested? |
