@@ -12,7 +12,7 @@
 | Windows   | x86_64      | o       | tested         |
 | Windows   | x86_arm64   | o       | not yet        |
 | Linux     | x86_64      | o       | not yet        |
-| macOS     | x86_64      | o       | not yet        |
+| macOS     | x86_64      | o       | tested         |
 | iOS       | 64bit       | o       | not yet        |
 | tvOS      | 64bit       | x       | not yet        |
 | Android   | armeabi-v7a | o       | not yet        |

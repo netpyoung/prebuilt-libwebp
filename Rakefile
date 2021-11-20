@@ -186,10 +186,33 @@ task :update_library_macos do
       sh 'make && make install'
     end
 
-    cp_r `realpath libwebp/.lib/lib/libwebp.dylib`.strip, lib_dir
-    cp_r `realpath libwebp/.lib/lib/libwebpdecoder.dylib`.strip, lib_dir
-    cp_r `realpath libwebp/.lib/lib/libwebpdemux.dylib`.strip, lib_dir
-    cp_r `realpath libwebp/.lib/lib/libwebpmux.dylib`.strip, lib_dir
+    path_libwebp        = `realpath libwebp/.lib/lib/libwebp.dylib`.strip
+    path_libwebpdecoder = `realpath libwebp/.lib/lib/libwebpdecoder.dylib`.strip
+    path_libwebpdemux   = `realpath libwebp/.lib/lib/libwebpdemux.dylib`.strip
+    path_libwebpmux     = `realpath libwebp/.lib/lib/libwebpmux.dylib`.strip
+
+    cp_r path_libwebp,        "#{lib_dir}/webp.bundle"
+    cp_r path_libwebpdecoder, "#{lib_dir}/webpdecoder.bundle"
+    cp_r path_libwebpdemux,   "#{lib_dir}/webpdemux.bundle"
+    cp_r path_libwebpmux,     "#{lib_dir}/webpmux.bundle"
+
+    sh "otool -L #{lib_dir}/webp.bundle"
+    sh "otool -L #{lib_dir}/webpdecoder.bundle"
+    sh "otool -L #{lib_dir}/webpdemux.bundle"
+    sh "otool -L #{lib_dir}/webpmux.bundle"
+
+    sh "install_name_tool -id @loader_path/webp.bundle            #{lib_dir}/webp.bundle"
+    sh "install_name_tool -id @loader_path/wewebpdecoderbp.bundle #{lib_dir}/webpdecoder.bundle"
+    sh "install_name_tool -id @loader_path/webpdemux.bundle       #{lib_dir}/webpdemux.bundle"
+    sh "install_name_tool -id @loader_path/webpmux.bundle         #{lib_dir}/webpmux.bundle"
+    sh "install_name_tool -change #{path_libwebp} @loader_path/webp.bundle #{lib_dir}/webpdemux.bundle"
+    sh "install_name_tool -change #{path_libwebp} @loader_path/webp.bundle #{lib_dir}/webpmux.bundle"
+
+    sh "otool -L #{lib_dir}/webp.bundle"
+    sh "otool -L #{lib_dir}/webpdecoder.bundle"
+    sh "otool -L #{lib_dir}/webpdemux.bundle"
+    sh "otool -L #{lib_dir}/webpmux.bundle"
+
   end
 end
 
