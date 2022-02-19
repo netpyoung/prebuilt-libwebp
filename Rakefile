@@ -171,49 +171,100 @@ end
 ## ================================================================================
 desc "update library_macos"
 task :update_library_macos do
-  build_dir = 'build/macos'
-  lib_dir = "#{GIT_ROOT}/lib/macos_64"
+  BUILD_DIR = "#{Dir.pwd}/build/macos"
+  LIB_DIR = "#{GIT_ROOT}/lib/macos_64"
 
-  FileUtils.mkdir_p(build_dir) unless File.directory?(build_dir)
-  FileUtils.mkdir_p(lib_dir) unless File.directory?(lib_dir)
+  FileUtils.mkdir_p(BUILD_DIR) unless File.directory?(BUILD_DIR)
+  FileUtils.mkdir_p(LIB_DIR) unless File.directory?(LIB_DIR)
 
-  Dir.chdir(build_dir) do
+  DEVELOPER=`xcode-select -print-path`.strip
+  TOOLCHAIN_BIN="#{DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin"
+  ENV["CC"] ="#{TOOLCHAIN_BIN}/clang"
+  ENV["AR"] ="#{TOOLCHAIN_BIN}/ar"
+  ENV["RANLIB"] ="#{TOOLCHAIN_BIN}/ranlib"
+  ENV["STRIP"] ="#{TOOLCHAIN_BIN}/strip"
+  ENV["LIBTOOL"] ="#{TOOLCHAIN_BIN}/libtool"
+  ENV["NM"] ="#{TOOLCHAIN_BIN}/nm"
+  ENV["LD"] ="#{TOOLCHAIN_BIN}/ld"
+
+  OUT_LIB_PATHS_webp = ''
+  OUT_LIB_PATHS_webpdecoder = ''
+  OUT_LIB_PATHS_webpdemux = ''
+  OUT_LIB_PATHS_webpmux = ''
+
+  HOST="aarch64-apple-darwin"
+  ISYSROOT=`xcrun --sdk macosx --show-sdk-path`
+
+  Dir.chdir(BUILD_DIR) do
     sh 'git clone https://github.com/webmproject/libwebp.git'
     Dir.chdir('libwebp') do
       sh "git checkout #{VERSION}"
-      sh './autogen.sh'
-      sh "./configure --prefix=`pwd`/.lib --enable-everything --disable-static"
-      sh 'make && make install'
+
+      for ARCH in ['x86_64', 'arm64']
+        BUILD_ARCH_DIR="#{BUILD_DIR}/#{ARCH}"
+        LIB_ARCH_DIR="#{LIB_DIR}/#{ARCH}"
+        sh "mkdir -p #{BUILD_ARCH_DIR}"
+        sh "mkdir -p #{LIB_ARCH_DIR}"
+
+        TARGET="#{ARCH}-apple-macos"
+        CFLAGS = ""\
+          " -arch #{ARCH}"  \
+          " -target #{TARGET}" \
+          " -isysroot #{ISYSROOT}" \
+          " -mmacos-version-min=13.0" \
+          " -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include" \
+          " -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
+        sh './autogen.sh'
+        sh "./configure --prefix=#{BUILD_ARCH_DIR} --enable-everything --disable-static --host=#{HOST} CFLAGS='#{CFLAGS}'"
+        sh 'make && make install'
+
+        path_libwebp        = `realpath #{BUILD_ARCH_DIR}/lib/libwebp.dylib`.strip
+        path_libwebpdecoder = `realpath #{BUILD_ARCH_DIR}/lib/libwebpdecoder.dylib`.strip
+        path_libwebpdemux   = `realpath #{BUILD_ARCH_DIR}/lib/libwebpdemux.dylib`.strip
+        path_libwebpmux     = `realpath #{BUILD_ARCH_DIR}/lib/libwebpmux.dylib`.strip
+    
+        sh "cp -r #{path_libwebp}        #{BUILD_ARCH_DIR}/webp.bundle"
+        sh "cp -r #{path_libwebpdecoder} #{BUILD_ARCH_DIR}/webpdecoder.bundle"
+        sh "cp -r #{path_libwebpdemux}   #{BUILD_ARCH_DIR}/webpdemux.bundle"
+        sh "cp -r #{path_libwebpmux}     #{BUILD_ARCH_DIR}/webpmux.bundle"
+    
+        sh "otool -L #{BUILD_ARCH_DIR}/webp.bundle"
+        sh "otool -L #{BUILD_ARCH_DIR}/webpdecoder.bundle"
+        sh "otool -L #{BUILD_ARCH_DIR}/webpdemux.bundle"
+        sh "otool -L #{BUILD_ARCH_DIR}/webpmux.bundle"
+    
+        sh "install_name_tool -id @loader_path/webp.bundle            #{BUILD_ARCH_DIR}/webp.bundle"
+        sh "install_name_tool -id @loader_path/wewebpdecoderbp.bundle #{BUILD_ARCH_DIR}/webpdecoder.bundle"
+        sh "install_name_tool -id @loader_path/webpdemux.bundle       #{BUILD_ARCH_DIR}/webpdemux.bundle"
+        sh "install_name_tool -id @loader_path/webpmux.bundle         #{BUILD_ARCH_DIR}/webpmux.bundle"
+        sh "install_name_tool -change #{path_libwebp} @loader_path/webp.bundle #{BUILD_ARCH_DIR}/webpdemux.bundle"
+        sh "install_name_tool -change #{path_libwebp} @loader_path/webp.bundle #{BUILD_ARCH_DIR}/webpmux.bundle"
+    
+        sh "otool -L #{BUILD_ARCH_DIR}/webp.bundle"
+        sh "otool -L #{BUILD_ARCH_DIR}/webpdecoder.bundle"
+        sh "otool -L #{BUILD_ARCH_DIR}/webpdemux.bundle"
+        sh "otool -L #{BUILD_ARCH_DIR}/webpmux.bundle"
+    
+        OUT_LIB_PATHS_webp        += "  #{BUILD_ARCH_DIR}/webp.bundle"
+        OUT_LIB_PATHS_webpdecoder += "  #{BUILD_ARCH_DIR}/webpdecoder.bundle"
+        OUT_LIB_PATHS_webpdemux   += "  #{BUILD_ARCH_DIR}/webpdemux.bundle"
+        OUT_LIB_PATHS_webpmux     += "  #{BUILD_ARCH_DIR}/webpmux.bundle"
+
+        sh 'make clean'
+      end
     end
-
-    path_libwebp        = `realpath libwebp/.lib/lib/libwebp.dylib`.strip
-    path_libwebpdecoder = `realpath libwebp/.lib/lib/libwebpdecoder.dylib`.strip
-    path_libwebpdemux   = `realpath libwebp/.lib/lib/libwebpdemux.dylib`.strip
-    path_libwebpmux     = `realpath libwebp/.lib/lib/libwebpmux.dylib`.strip
-
-    cp_r path_libwebp,        "#{lib_dir}/webp.bundle"
-    cp_r path_libwebpdecoder, "#{lib_dir}/webpdecoder.bundle"
-    cp_r path_libwebpdemux,   "#{lib_dir}/webpdemux.bundle"
-    cp_r path_libwebpmux,     "#{lib_dir}/webpmux.bundle"
-
-    sh "otool -L #{lib_dir}/webp.bundle"
-    sh "otool -L #{lib_dir}/webpdecoder.bundle"
-    sh "otool -L #{lib_dir}/webpdemux.bundle"
-    sh "otool -L #{lib_dir}/webpmux.bundle"
-
-    sh "install_name_tool -id @loader_path/webp.bundle            #{lib_dir}/webp.bundle"
-    sh "install_name_tool -id @loader_path/wewebpdecoderbp.bundle #{lib_dir}/webpdecoder.bundle"
-    sh "install_name_tool -id @loader_path/webpdemux.bundle       #{lib_dir}/webpdemux.bundle"
-    sh "install_name_tool -id @loader_path/webpmux.bundle         #{lib_dir}/webpmux.bundle"
-    sh "install_name_tool -change #{path_libwebp} @loader_path/webp.bundle #{lib_dir}/webpdemux.bundle"
-    sh "install_name_tool -change #{path_libwebp} @loader_path/webp.bundle #{lib_dir}/webpmux.bundle"
-
-    sh "otool -L #{lib_dir}/webp.bundle"
-    sh "otool -L #{lib_dir}/webpdecoder.bundle"
-    sh "otool -L #{lib_dir}/webpdemux.bundle"
-    sh "otool -L #{lib_dir}/webpmux.bundle"
-
   end
+  
+
+  sh "lipo -create #{OUT_LIB_PATHS_webp}        -output #{LIB_DIR}/webp.bundle"
+  sh "lipo -create #{OUT_LIB_PATHS_webpdecoder} -output #{LIB_DIR}/webpdecoder.bundle"
+  sh "lipo -create #{OUT_LIB_PATHS_webpdemux}   -output #{LIB_DIR}/webpdemux.bundle"
+  sh "lipo -create #{OUT_LIB_PATHS_webpmux}     -output #{LIB_DIR}/webpmux.bundle"
+
+  sh "lipo -info #{LIB_DIR}/webp.bundle"
+  sh "lipo -info #{LIB_DIR}/webpdecoder.bundle"
+  sh "lipo -info #{LIB_DIR}/webpdemux.bundle"
+  sh "lipo -info #{LIB_DIR}/webpmux.bundle"
 end
 
 
