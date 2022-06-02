@@ -211,7 +211,7 @@ task :update_library_macos do
           " -arch #{ARCH}"  \
           " -target #{TARGET}" \
           " -isysroot #{ISYSROOT}" \
-          " -mmacos-version-min=13.0" \
+          " -mmacos-version-min=10.12" \
           " -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include" \
           " -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
         sh './autogen.sh'
