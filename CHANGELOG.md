@@ -2,6 +2,10 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [0.0.12]
+
+- libwebp tag v1.3.2
+
 ## [0.0.11]
 
 - libwebp tag v1.3.1
