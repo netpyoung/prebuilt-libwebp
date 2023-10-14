@@ -64,7 +64,7 @@ task :update_library_windows_x86 do
       cp 'output/release-dynamic/x86/bin/libwebp.dll', arch_lib_dir
       cp 'output/release-dynamic/x86/bin/libwebpdecoder.dll', arch_lib_dir
       cp 'output/release-dynamic/x86/bin/libwebpdemux.dll', arch_lib_dir
-      cp 'output/release-dynamic/x64/bin/libsharpyuv.dll', arch_lib_dir
+      cp 'output/release-dynamic/x86/bin/libsharpyuv.dll', arch_lib_dir
     end
   end
 end
@@ -93,7 +93,7 @@ task :update_library_windows_arm64 do
       cp 'output/release-dynamic/ARM/bin/libwebp.dll', arch_lib_dir
       cp 'output/release-dynamic/ARM/bin/libwebpdecoder.dll', arch_lib_dir
       cp 'output/release-dynamic/ARM/bin/libwebpdemux.dll', arch_lib_dir
-      cp 'output/release-dynamic/x64/bin/libsharpyuv.dll', arch_lib_dir
+      cp 'output/release-dynamic/ARM/bin/libsharpyuv.dll', arch_lib_dir
     end
   end
 end
