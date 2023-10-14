@@ -3,6 +3,7 @@ require 'digest/md5'
 
 GIT_ROOT = `git rev-parse --show-toplevel`.strip
 VERSION = 'v1.3.2'
+VERSION = '233960a0ad8c640acd458a6966dea09e12c1325a'
 LIBWEBP = "libwebp"
 
 desc "default"
@@ -41,6 +42,7 @@ task :update_library_windows_x64 do
       cp 'output/release-dynamic/x64/bin/libwebp.dll', arch_lib_dir
       cp 'output/release-dynamic/x64/bin/libwebpdecoder.dll', arch_lib_dir
       cp 'output/release-dynamic/x64/bin/libwebpdemux.dll', arch_lib_dir
+      cp 'output/release-dynamic/x64/bin/libsharpyuv.dll', arch_lib_dir
     end
   end
 end
@@ -62,6 +64,7 @@ task :update_library_windows_x86 do
       cp 'output/release-dynamic/x86/bin/libwebp.dll', arch_lib_dir
       cp 'output/release-dynamic/x86/bin/libwebpdecoder.dll', arch_lib_dir
       cp 'output/release-dynamic/x86/bin/libwebpdemux.dll', arch_lib_dir
+      cp 'output/release-dynamic/x64/bin/libsharpyuv.dll', arch_lib_dir
     end
   end
 end
@@ -90,6 +93,7 @@ task :update_library_windows_arm64 do
       cp 'output/release-dynamic/ARM/bin/libwebp.dll', arch_lib_dir
       cp 'output/release-dynamic/ARM/bin/libwebpdecoder.dll', arch_lib_dir
       cp 'output/release-dynamic/ARM/bin/libwebpdemux.dll', arch_lib_dir
+      cp 'output/release-dynamic/x64/bin/libsharpyuv.dll', arch_lib_dir
     end
   end
 end
@@ -191,6 +195,7 @@ task :update_library_macos do
   OUT_LIB_PATHS_webpdecoder = ''
   OUT_LIB_PATHS_webpdemux = ''
   OUT_LIB_PATHS_webpmux = ''
+  OUT_LIB_PATHS_sharpyuv = ''
 
   HOST="aarch64-apple-darwin"
   ISYSROOT=`xcrun --sdk macosx --show-sdk-path`
@@ -222,21 +227,25 @@ task :update_library_macos do
         path_libwebpdecoder = `realpath #{BUILD_ARCH_DIR}/lib/libwebpdecoder.dylib`.strip
         path_libwebpdemux   = `realpath #{BUILD_ARCH_DIR}/lib/libwebpdemux.dylib`.strip
         path_libwebpmux     = `realpath #{BUILD_ARCH_DIR}/lib/libwebpmux.dylib`.strip
+        path_libsharpyuv    = `realpath #{BUILD_ARCH_DIR}/lib/libsharpyuv.dylib`.strip
     
         sh "cp -r #{path_libwebp}        #{BUILD_ARCH_DIR}/webp.bundle"
         sh "cp -r #{path_libwebpdecoder} #{BUILD_ARCH_DIR}/webpdecoder.bundle"
         sh "cp -r #{path_libwebpdemux}   #{BUILD_ARCH_DIR}/webpdemux.bundle"
         sh "cp -r #{path_libwebpmux}     #{BUILD_ARCH_DIR}/webpmux.bundle"
+        sh "cp -r #{path_libsharpyuv}    #{BUILD_ARCH_DIR}/sharpyuv.bundle"
     
         sh "otool -L #{BUILD_ARCH_DIR}/webp.bundle"
         sh "otool -L #{BUILD_ARCH_DIR}/webpdecoder.bundle"
         sh "otool -L #{BUILD_ARCH_DIR}/webpdemux.bundle"
         sh "otool -L #{BUILD_ARCH_DIR}/webpmux.bundle"
+        sh "otool -L #{BUILD_ARCH_DIR}/sharpyuv.bundle"
     
         sh "install_name_tool -id @loader_path/webp.bundle            #{BUILD_ARCH_DIR}/webp.bundle"
         sh "install_name_tool -id @loader_path/wewebpdecoderbp.bundle #{BUILD_ARCH_DIR}/webpdecoder.bundle"
         sh "install_name_tool -id @loader_path/webpdemux.bundle       #{BUILD_ARCH_DIR}/webpdemux.bundle"
         sh "install_name_tool -id @loader_path/webpmux.bundle         #{BUILD_ARCH_DIR}/webpmux.bundle"
+        sh "install_name_tool -id @loader_path/sharpyuv.bundle        #{BUILD_ARCH_DIR}/sharpyuv.bundle"
         sh "install_name_tool -change #{path_libwebp} @loader_path/webp.bundle #{BUILD_ARCH_DIR}/webpdemux.bundle"
         sh "install_name_tool -change #{path_libwebp} @loader_path/webp.bundle #{BUILD_ARCH_DIR}/webpmux.bundle"
     
@@ -244,11 +253,13 @@ task :update_library_macos do
         sh "otool -L #{BUILD_ARCH_DIR}/webpdecoder.bundle"
         sh "otool -L #{BUILD_ARCH_DIR}/webpdemux.bundle"
         sh "otool -L #{BUILD_ARCH_DIR}/webpmux.bundle"
+        sh "otool -L #{BUILD_ARCH_DIR}/sharpyuv.bundle"
     
         OUT_LIB_PATHS_webp        += "  #{BUILD_ARCH_DIR}/webp.bundle"
         OUT_LIB_PATHS_webpdecoder += "  #{BUILD_ARCH_DIR}/webpdecoder.bundle"
         OUT_LIB_PATHS_webpdemux   += "  #{BUILD_ARCH_DIR}/webpdemux.bundle"
         OUT_LIB_PATHS_webpmux     += "  #{BUILD_ARCH_DIR}/webpmux.bundle"
+        OUT_LIB_PATHS_sharpyuv    += "  #{BUILD_ARCH_DIR}/sharpyuv.bundle"
 
         sh 'make clean'
       end
@@ -260,11 +271,13 @@ task :update_library_macos do
   sh "lipo -create #{OUT_LIB_PATHS_webpdecoder} -output #{LIB_DIR}/webpdecoder.bundle"
   sh "lipo -create #{OUT_LIB_PATHS_webpdemux}   -output #{LIB_DIR}/webpdemux.bundle"
   sh "lipo -create #{OUT_LIB_PATHS_webpmux}     -output #{LIB_DIR}/webpmux.bundle"
+  sh "lipo -create #{OUT_LIB_PATHS_sharpyuv}    -output #{LIB_DIR}/sharpyuv.bundle"
 
   sh "lipo -info #{LIB_DIR}/webp.bundle"
   sh "lipo -info #{LIB_DIR}/webpdecoder.bundle"
   sh "lipo -info #{LIB_DIR}/webpdemux.bundle"
   sh "lipo -info #{LIB_DIR}/webpmux.bundle"
+  sh "lipo -info #{LIB_DIR}/sharpyuv.bundle"
 end
 
 
@@ -286,18 +299,18 @@ task :update_library_ios do
       sh "./iosbuild.sh"
 
       # universal static library
-      # ['libwebp.a', 'libwebpdecoder.a', 'libwebpdemux.a'].each do |a|
+      # ['libwebp.a', 'libwebpdecoder.a', 'libwebpdemux.a', 'libsharpyuv.a'].each do |a|
       #   sh "lipo -create -output #{a} iosbuild/iPhoneOS-#{sdk_version}-aarch64/lib/#{a} iosbuild/iPhoneOS-#{sdk_version}-armv7/lib/#{a}"
       #   cp_r a, lib_dir
       # end
 
       # x64 only
-      ['libwebp.a', 'libwebpdecoder.a', 'libwebpdemux.a'].each do |a|
+      ['libwebp.a', 'libwebpdecoder.a', 'libwebpdemux.a', 'libsharpyuv.a'].each do |a|
         cp_r "iosbuild/iPhoneOS-#{sdk_version}-aarch64/lib/#{a}", lib_dir
       end
 
       # simulator static library
-      ['libwebp.a', 'libwebpdecoder.a', 'libwebpdemux.a'].each do |a|
+      ['libwebp.a', 'libwebpdecoder.a', 'libwebpdemux.a', 'libsharpyuv.a'].each do |a|
         # sh "lipo -create -output #{a} iosbuild/iPhoneSimulator-#{sdk_version}-x86_64/lib/#{a} iosbuild/iPhoneSimulator-#{sdk_version}-i386/lib/#{a}"
         cp_r "iosbuild/iPhoneSimulator-#{sdk_version}-x86_64/lib/#{a}", lib_simulator_dir
       end
