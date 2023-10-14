@@ -249,7 +249,9 @@ task :update_library_macos do
         sh "install_name_tool -change #{path_libwebp} @loader_path/webp.bundle #{BUILD_ARCH_DIR}/webpdemux.bundle"
         sh "install_name_tool -change #{path_libwebp} @loader_path/webp.bundle #{BUILD_ARCH_DIR}/webpmux.bundle"
         sh "install_name_tool -change #{path_libsharpyuv} @loader_path/sharpyuv.bundle #{BUILD_ARCH_DIR}/webp.bundle"
-    
+        sh "install_name_tool -change #{path_libsharpyuv} @loader_path/sharpyuv.bundle #{BUILD_ARCH_DIR}/webpdemux.bundle"
+        sh "install_name_tool -change #{path_libsharpyuv} @loader_path/sharpyuv.bundle #{BUILD_ARCH_DIR}/webpmux.bundle"
+
         sh "otool -L #{BUILD_ARCH_DIR}/webp.bundle"
         sh "otool -L #{BUILD_ARCH_DIR}/webpdecoder.bundle"
         sh "otool -L #{BUILD_ARCH_DIR}/webpdemux.bundle"
