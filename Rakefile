@@ -3,6 +3,7 @@ require 'digest/md5'
 
 GIT_ROOT = `git rev-parse --show-toplevel`.strip
 VERSION = 'v1.3.2'
+VERSION = '233960a0ad8c640acd458a6966dea09e12c1325a'
 LIBWEBP = "libwebp"
 
 desc "default"
@@ -41,6 +42,7 @@ task :update_library_windows_x64 do
       cp 'output/release-dynamic/x64/bin/libwebp.dll', arch_lib_dir
       cp 'output/release-dynamic/x64/bin/libwebpdecoder.dll', arch_lib_dir
       cp 'output/release-dynamic/x64/bin/libwebpdemux.dll', arch_lib_dir
+      cp 'output/release-dynamic/x64/bin/libsharpyuv.dll', arch_lib_dir
     end
   end
 end
@@ -62,6 +64,7 @@ task :update_library_windows_x86 do
       cp 'output/release-dynamic/x86/bin/libwebp.dll', arch_lib_dir
       cp 'output/release-dynamic/x86/bin/libwebpdecoder.dll', arch_lib_dir
       cp 'output/release-dynamic/x86/bin/libwebpdemux.dll', arch_lib_dir
+      cp 'output/release-dynamic/x64/bin/libsharpyuv.dll', arch_lib_dir
     end
   end
 end
@@ -90,6 +93,7 @@ task :update_library_windows_arm64 do
       cp 'output/release-dynamic/ARM/bin/libwebp.dll', arch_lib_dir
       cp 'output/release-dynamic/ARM/bin/libwebpdecoder.dll', arch_lib_dir
       cp 'output/release-dynamic/ARM/bin/libwebpdemux.dll', arch_lib_dir
+      cp 'output/release-dynamic/x64/bin/libsharpyuv.dll', arch_lib_dir
     end
   end
 end
@@ -295,18 +299,18 @@ task :update_library_ios do
       sh "./iosbuild.sh"
 
       # universal static library
-      # ['libwebp.a', 'libwebpdecoder.a', 'libwebpdemux.a'].each do |a|
+      # ['libwebp.a', 'libwebpdecoder.a', 'libwebpdemux.a', 'libsharpyuv.a'].each do |a|
       #   sh "lipo -create -output #{a} iosbuild/iPhoneOS-#{sdk_version}-aarch64/lib/#{a} iosbuild/iPhoneOS-#{sdk_version}-armv7/lib/#{a}"
       #   cp_r a, lib_dir
       # end
 
       # x64 only
-      ['libwebp.a', 'libwebpdecoder.a', 'libwebpdemux.a'].each do |a|
+      ['libwebp.a', 'libwebpdecoder.a', 'libwebpdemux.a', 'libsharpyuv.a'].each do |a|
         cp_r "iosbuild/iPhoneOS-#{sdk_version}-aarch64/lib/#{a}", lib_dir
       end
 
       # simulator static library
-      ['libwebp.a', 'libwebpdecoder.a', 'libwebpdemux.a'].each do |a|
+      ['libwebp.a', 'libwebpdecoder.a', 'libwebpdemux.a', 'libsharpyuv.a'].each do |a|
         # sh "lipo -create -output #{a} iosbuild/iPhoneSimulator-#{sdk_version}-x86_64/lib/#{a} iosbuild/iPhoneSimulator-#{sdk_version}-i386/lib/#{a}"
         cp_r "iosbuild/iPhoneSimulator-#{sdk_version}-x86_64/lib/#{a}", lib_simulator_dir
       end
