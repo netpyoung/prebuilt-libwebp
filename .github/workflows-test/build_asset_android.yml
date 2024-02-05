@@ -8,17 +8,17 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Android NDK
-        uses: nttld/setup-ndk@v1.0.6
+        uses: nttld/setup-ndk@v1
         with:
-          ndk-version: r21e
+          ndk-version: r25c
 
       - name: Install Ruby
-        uses: ruby/setup-ruby@v1.82.0
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: 3.3
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Run Buildscript

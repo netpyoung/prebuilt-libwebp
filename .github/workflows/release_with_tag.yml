@@ -8,54 +8,17 @@ on:
 jobs:
 
   ## ======================================================================================================
-  release:
-    name: Write Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Get Tagname
-        id: tag_name
-        run: |
-          echo "current_version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-        shell: bash
-
-      - name: Changelog Reader
-        id: changelog_reader
-        uses: mindsers/changelog-reader-action@v2
-        with:
-          version: ${{ steps.tag_name.outputs.current_version }}
-          path: ./CHANGELOG.md
-
-      - name: Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          draft: false
-          prerelease: false
-          release_name: ${{ github.ref }}
-          tag_name: ${{ github.ref }}
-          body: ${{ steps.changelog_reader.outputs.changes }}
-
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-
-  ## ======================================================================================================
   upload_asset_windows:
-    needs: release
     name: Upload Asset on Windows
     runs-on: windows-2019
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Ruby
-        uses: ruby/setup-ruby@v1.82.0
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: 3.3
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Remove Name Conflict
@@ -92,29 +55,32 @@ jobs:
       - name: Print MD5
         run: bundle exec rake print_lib_md5
 
-      - name: Upload Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Rename lib.zip
+        shell: pwsh
+        run: mv lib.zip windows.zip
+
+      - name: 🎁⏫ Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ./lib.zip
-          asset_name: windows.zip
-          asset_content_type: application/octet-stream
+          name: artifact-windows
+          path: windows.zip
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
 
   ## ======================================================================================================
   upload_asset_linux:
-    needs: release
     name: Upload Asset on Linux
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Ruby
-        uses: ruby/setup-ruby@v1.82.0
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: 3.3
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Run Buildscript
@@ -125,34 +91,35 @@ jobs:
       - name: Print MD5
         run: bundle exec rake print_lib_md5
 
-      - name: Upload Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Rename lib.zip
+        run: mv lib.zip linux.zip
+
+      - name: 🎁⏫ Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ./lib.zip
-          asset_name: linux.zip
-          asset_content_type: application/octet-stream
+          name: artifact-linux
+          path: linux.zip
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
 
   ## ======================================================================================================
   upload_asset_android:
-    needs: release
     name: Upload Asset on Linux (Android)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
         with:
-          ndk-version: r21e
+          ndk-version: r25c
 
       - name: Install Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: 3.3
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Run Buildscript
@@ -163,32 +130,34 @@ jobs:
       - name: Print MD5
         run: bundle exec rake print_lib_md5
 
-      - name: Upload Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Rename lib.zip
+        run: mv lib.zip android.zip
+
+      - name: 🎁⏫ Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ./lib.zip
-          asset_name: android.zip
-          asset_content_type: application/octet-stream
+          name: artifact-android
+          path: android.zip
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
 
   ## ======================================================================================================
   upload_asset_macos:
-    needs: release
     name: Upload Asset on macOS
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Dependency
         run: brew install coreutils automake
 
       - name: Install Ruby
-        uses: ruby/setup-ruby@v1.82.0
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: 3.3
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Run Buildscript
@@ -199,32 +168,33 @@ jobs:
       - name: Print MD5
         run: bundle exec rake print_lib_md5
 
-      - name: Upload Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Rename lib.zip
+        run: mv lib.zip macos.zip
+
+      - name: 🎁⏫ Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ./lib.zip
-          asset_name: macos.zip
-          asset_content_type: application/octet-stream
+          name: artifact-macos
+          path: macos.zip
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
 
   ## ======================================================================================================
   upload_asset_ios:
-    needs: release
     name: Upload Asset on macOS (iOS)
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Dependency
         run: brew install coreutils automake
 
       - name: Install Ruby
-        uses: ruby/setup-ruby@v1.82.0
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: 3.3
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Run Buildscript
@@ -235,12 +205,71 @@ jobs:
       - name: Print MD5
         run: bundle exec rake print_lib_md5
 
-      - name: Upload Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Rename lib.zip
+        run: mv lib.zip ios.zip
+
+      - name: 🎁⏫ Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ./lib.zip
-          asset_name: ios.zip
-          asset_content_type: application/octet-stream
+          name: artifact-ios
+          path: ios.zip
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  ## ======================================================================================================
+  release:
+    needs: [upload_asset_windows, upload_asset_linux, upload_asset_android, upload_asset_macos, upload_asset_ios]
+    name: Write Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            CHANGELOG.md
+
+      - name: Make Directory For Download Artifacts
+        run: |
+          mkdir -p download-artifacts
+
+      - name: 🎁⏬ Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          path: download-artifacts
+
+      - name: Log artifact download
+        run: |
+          ls -alh
+          ls -alh download-artifacts
+
+      - name: Get Tagname
+        id: tag_name
+        run: |
+          echo "current_version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Changelog Reader
+        id: changelog_reader
+        uses: mindsers/changelog-reader-action@v2
+        with:
+          version: ${{ steps.tag_name.outputs.current_version }}
+          path: ./CHANGELOG.md
+
+      - name: 🚀 Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          prerelease: false
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref }}
+          body: ${{ steps.changelog_reader.outputs.changes }}
+          fail_on_unmatched_files: true
+          files: |
+            ./download-artifacts/artifact-android/android.zip
+            ./download-artifacts/artifact-linux/linux.zip
+            ./download-artifacts/artifact-windows/windows.zip
+            ./download-artifacts/artifact-macos/macos.zip
+            ./download-artifacts/artifact-ios/ios.zip
+
