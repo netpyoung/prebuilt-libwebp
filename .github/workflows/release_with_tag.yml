@@ -8,48 +8,7 @@ on:
 jobs:
 
   ## ======================================================================================================
-  release:
-    name: Write Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            CHANGELOG.md
-
-      - name: Get Tagname
-        id: tag_name
-        run: |
-          echo "current_version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-        shell: bash
-
-      - name: Changelog Reader
-        id: changelog_reader
-        uses: mindsers/changelog-reader-action@v2
-        with:
-          version: ${{ steps.tag_name.outputs.current_version }}
-          path: ./CHANGELOG.md
-
-      - name: Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          draft: false
-          prerelease: false
-          release_name: ${{ github.ref }}
-          tag_name: ${{ github.ref }}
-          body: ${{ steps.changelog_reader.outputs.changes }}
-
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-
-  ## ======================================================================================================
   upload_asset_windows:
-    needs: release
     name: Upload Asset on Windows
     runs-on: windows-2019
     steps:
@@ -108,7 +67,6 @@ jobs:
 
   ## ======================================================================================================
   upload_asset_linux:
-    needs: release
     name: Upload Asset on Linux
     runs-on: ubuntu-latest
     steps:
@@ -141,7 +99,6 @@ jobs:
 
   ## ======================================================================================================
   upload_asset_android:
-    needs: release
     name: Upload Asset on Linux (Android)
     runs-on: ubuntu-latest
     steps:
@@ -179,7 +136,6 @@ jobs:
 
   ## ======================================================================================================
   upload_asset_macos:
-    needs: release
     name: Upload Asset on macOS
     runs-on: macos-latest
     steps:
@@ -215,7 +171,6 @@ jobs:
 
   ## ======================================================================================================
   upload_asset_ios:
-    needs: release
     name: Upload Asset on macOS (iOS)
     runs-on: macos-latest
     steps:
@@ -248,3 +203,45 @@ jobs:
           asset_path: ./lib.zip
           asset_name: ios.zip
           asset_content_type: application/octet-stream
+
+  ## ======================================================================================================
+  release:
+    needs: [upload_asset_windows, upload_asset_linux, upload_asset_android, upload_asset_macos, upload_asset_ios]
+    name: Write Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            CHANGELOG.md
+
+      - name: Get Tagname
+        id: tag_name
+        run: |
+          echo "current_version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Changelog Reader
+        id: changelog_reader
+        uses: mindsers/changelog-reader-action@v2
+        with:
+          version: ${{ steps.tag_name.outputs.current_version }}
+          path: ./CHANGELOG.md
+
+      - name: Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ github.ref }}
+          tag_name: ${{ github.ref }}
+          body: ${{ steps.changelog_reader.outputs.changes }}
+
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+
