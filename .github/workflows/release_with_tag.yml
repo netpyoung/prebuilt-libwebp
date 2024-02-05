@@ -257,18 +257,19 @@ jobs:
           version: ${{ steps.tag_name.outputs.current_version }}
           path: ./CHANGELOG.md
 
-      - name: Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 🚀 Release
+        uses: softprops/action-gh-release@v1
         with:
-          draft: false
+          draft: true
           prerelease: false
-          release_name: ${{ github.ref }}
+          name: ${{ github.ref_name }}
           tag_name: ${{ github.ref }}
           body: ${{ steps.changelog_reader.outputs.changes }}
-
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+          fail_on_unmatched_files: true
+          files: |
+            ./download-artifacts/artifact-android/android.zip
+            ./download-artifacts/artifact-linux/linux.zip
+            ./download-artifacts/artifact-windows/windows.zip
+            ./download-artifacts/artifact-macos/macos.zip
+            ./download-artifacts/artifact-ios/ios.zip
 
