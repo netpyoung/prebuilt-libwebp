@@ -18,7 +18,7 @@ jobs:
       - name: Install Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: 3.3
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Remove Name Conflict
@@ -80,7 +80,7 @@ jobs:
       - name: Install Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: 3.3
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Run Buildscript
@@ -119,7 +119,7 @@ jobs:
       - name: Install Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: 3.3
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Run Buildscript
@@ -157,7 +157,7 @@ jobs:
       - name: Install Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: 3.3
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Run Buildscript
@@ -194,7 +194,7 @@ jobs:
       - name: Install Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: 3.3
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Run Buildscript
