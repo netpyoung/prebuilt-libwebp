@@ -217,6 +217,20 @@ jobs:
           sparse-checkout: |
             CHANGELOG.md
 
+      - name: Make Directory For Download Artifacts
+        run: |
+          mkdir -p download-artifacts
+
+      - name: 🎁⏬ Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          path: download-artifacts
+
+      - name: Log artifact download
+        run: |
+          ls -alh
+          ls -alh download-artifacts
+
       - name: Get Tagname
         id: tag_name
         run: |
