@@ -55,15 +55,19 @@ jobs:
       - name: Print MD5
         run: bundle exec rake print_lib_md5
 
-      - name: Upload Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Rename lib.zip
+        shell: pwsh
+        run: mv lib.zip windows.zip
+
+      - name: 🎁⏫ Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ./lib.zip
-          asset_name: windows.zip
-          asset_content_type: application/octet-stream
+          name: artifact-windows
+          path: windows.zip
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
 
   ## ======================================================================================================
   upload_asset_linux:
@@ -87,15 +91,17 @@ jobs:
       - name: Print MD5
         run: bundle exec rake print_lib_md5
 
-      - name: Upload Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Rename lib.zip
+        run: mv lib.zip linux.zip
+
+      - name: 🎁⏫ Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ./lib.zip
-          asset_name: linux.zip
-          asset_content_type: application/octet-stream
+          name: artifact-linux
+          path: linux.zip
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
 
   ## ======================================================================================================
   upload_asset_android:
@@ -124,15 +130,18 @@ jobs:
       - name: Print MD5
         run: bundle exec rake print_lib_md5
 
-      - name: Upload Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Rename lib.zip
+        run: mv lib.zip android.zip
+
+      - name: 🎁⏫ Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ./lib.zip
-          asset_name: android.zip
-          asset_content_type: application/octet-stream
+          name: artifact-android
+          path: android.zip
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
 
   ## ======================================================================================================
   upload_asset_macos:
@@ -159,15 +168,17 @@ jobs:
       - name: Print MD5
         run: bundle exec rake print_lib_md5
 
-      - name: Upload Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Rename lib.zip
+        run: mv lib.zip macos.zip
+
+      - name: 🎁⏫ Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ./lib.zip
-          asset_name: macos.zip
-          asset_content_type: application/octet-stream
+          name: artifact-macos
+          path: macos.zip
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
 
   ## ======================================================================================================
   upload_asset_ios:
@@ -194,15 +205,17 @@ jobs:
       - name: Print MD5
         run: bundle exec rake print_lib_md5
 
-      - name: Upload Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Rename lib.zip
+        run: mv lib.zip ios.zip
+
+      - name: 🎁⏫ Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ./lib.zip
-          asset_name: ios.zip
-          asset_content_type: application/octet-stream
+          name: artifact-ios
+          path: ios.zip
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
 
   ## ======================================================================================================
   release:
