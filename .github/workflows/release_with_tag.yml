@@ -114,7 +114,19 @@ jobs:
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
         with:
-          ndk-version: r25c
+          # ref: Support 16 KB page sizes
+          # - https://github.com/netpyoung/unity.webp/issues/74
+          # - https://developer.android.com/guide/practices/page-sizes
+          # - https://developer.android.com/ndk/downloads
+          # 
+          # - readelf.exe -l yourlibrary.so
+          #   - Align 0x1000 => 4KB
+          #   - Align 0x4000 => 16KB 
+          #
+          # - 2025.05.24
+          #   - Latest LTS Version (r27c)
+          #   - Latest Stable Version (r28b)
+          ndk-version: r28b
 
       - name: Install Ruby
         uses: ruby/setup-ruby@v1
