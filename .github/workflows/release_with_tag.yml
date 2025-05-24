@@ -23,8 +23,10 @@ jobs:
 
       - name: Remove Name Conflict
         shell: pwsh
-        run: mv C:\msys64\usr\bin\link.exe C:\msys64\usr\bin\msys-link.exe
-
+        run: |
+          mv C:\msys64\usr\bin\link.exe C:\msys64\usr\bin\msys-link.exe
+          mv C:\hostedtoolcache\windows\Ruby\3.3.8\x64\msys64\usr\bin\link.exe C:\hostedtoolcache\windows\Ruby\3.3.8\x64\msys64\usr\bin\msys-link.exe
+      
       - name: Run Buildscript
         run: bundle exec rake prepare_library_windows
 
@@ -164,7 +166,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Dependency
-        run: brew install coreutils automake
+        run: brew install coreutils automake libtool
 
       - name: Install Ruby
         uses: ruby/setup-ruby@v1
@@ -201,7 +203,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Dependency
-        run: brew install coreutils automake
+        run: brew install coreutils automake libtool
 
       - name: Install Ruby
         uses: ruby/setup-ruby@v1

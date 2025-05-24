@@ -2,6 +2,11 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [0.0.14]
+
+- libwebp tag v1.5.0
+- change: ndk-version: r25c => r28b to suupport 16 KB page sizes
+
 ## [0.0.13]
 
 - libwebp tag v1.4.0
