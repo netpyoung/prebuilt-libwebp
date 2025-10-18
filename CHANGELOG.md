@@ -2,6 +2,12 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [0.0.15]
+
+- libwebp tag v1.6.0
+- remove rake(ruby) dependency
+- support ios simulator
+
 ## [0.0.14]
 
 - libwebp tag v1.5.0
