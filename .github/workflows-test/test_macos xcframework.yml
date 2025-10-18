@@ -1,0 +1,29 @@
+name: Build asset on Linux
+
+on: [push]
+
+jobs:
+  upload_asset_macos:
+    name: Upload Asset on macOS (XCFramework)
+    # ref: availabel image - https://github.com/actions/runner-images
+    runs-on: macos-latest
+    steps:
+      # https://github.com/actions/checkout
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install Dependency
+        run: brew install coreutils automake libtool
+
+      - name: Run Buildscript
+        run: ./build-on-mac-xcframework.zsh
+
+      # https://github.com/actions/upload-artifact
+      - name: 🎁⏫ Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-macos-xcframework
+          path: lib/macOS_xcframework/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0

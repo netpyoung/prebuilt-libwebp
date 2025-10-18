@@ -1,0 +1,26 @@
+name: Build asset on Linux
+
+on: [push]
+
+jobs:
+  build_asset_linux:
+    name: Build asset on Linux
+    # ref: availabel image - https://github.com/actions/runner-images
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/actions/checkout
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Run Buildscript
+        run: ./build-on-linux.sh
+
+      # https://github.com/actions/upload-artifact
+      - name: 🎁⏫ Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-linux
+          path: lib/linux_64/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0

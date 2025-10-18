@@ -1,0 +1,55 @@
+name: testing
+
+on: [push]
+
+jobs:
+
+  ## ======================================================================================================
+  upload_asset_windows:
+    name: Upload Asset on Windows
+    # ref: availabel image - https://github.com/actions/runner-images
+    runs-on: windows-2022
+    steps:
+      # https://github.com/actions/checkout
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # https://github.com/ilammy/msvc-dev-cmd
+      - name: Install Dependency x86_64
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+            arch: x86_64
+      # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepsshell
+      - name: Run Buildscript - x64
+        shell: cmd
+        run: build-on-windows.bat x64
+
+      - name: Install Dependency x86
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+            arch: x86
+      - name: Run Buildscript - x86
+        shell: cmd
+        run: build-on-windows.bat x86
+
+      - name: Install Dependency x86_arm64
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+            arch: x86_arm64
+      - name: Run Buildscript - x86_arm64
+        shell: cmd
+        run: build-on-windows.bat ARM
+
+#      - name: Run Zip
+#        shell: pwsh
+#        run: powershell -command "Compress-Archive -Path 'lib\windows\*' -DestinationPath 'windows.zip' -Force"
+
+      # https://github.com/actions/upload-artifact
+      - name: 🎁⏫ Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-windows
+          path: lib/windows/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0

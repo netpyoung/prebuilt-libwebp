@@ -1,0 +1,44 @@
+name: Build asset on Linux
+
+on: [push]
+
+jobs:
+  build_asset_linux:
+    name: Build asset on Linux
+    # ref: availabel image - https://github.com/actions/runner-images
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/actions/checkout
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # https://github.com/nttld/setup-ndk
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          # ref: Support 16 KB page sizes
+          # - https://github.com/netpyoung/unity.webp/issues/74
+          # - https://developer.android.com/guide/practices/page-sizes
+          # - https://developer.android.com/ndk/downloads
+          # 
+          # - readelf.exe -l yourlibrary.so
+          #   - Align 0x1000 => 4KB
+          #   - Align 0x4000 => 16KB 
+          #
+          # - 2025.05.24
+          #   - Latest LTS Version (r27c)
+          #   - Latest Stable Version (r28b)
+          ndk-version: r28b
+
+      - name: Run Buildscript
+        run: ./build-on-linux-android.sh
+
+      # https://github.com/actions/upload-artifact
+      - name: 🎁⏫ Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-android
+          path: lib/android/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
