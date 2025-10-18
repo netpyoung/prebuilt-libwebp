@@ -1,10 +1,10 @@
-name: Build asset on Linux
+name: test linux
 
 on: [push]
 
 jobs:
-  build_asset_linux:
-    name: Build asset on Linux
+  upload_asset_linux:
+    name: Upload Asset on Linux
     # ref: availabel image - https://github.com/actions/runner-images
     runs-on: ubuntu-latest
     steps:

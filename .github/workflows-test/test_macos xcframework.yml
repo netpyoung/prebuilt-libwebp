@@ -1,9 +1,9 @@
-name: Build asset on Linux
+name: test macos xcframework
 
 on: [push]
 
 jobs:
-  upload_asset_macos:
+  upload_asset_macos_xcframework:
     name: Upload Asset on macOS (XCFramework)
     # ref: availabel image - https://github.com/actions/runner-images
     runs-on: macos-latest

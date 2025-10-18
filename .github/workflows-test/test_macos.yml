@@ -1,4 +1,4 @@
-name: Build asset on Linux
+name: test macos
 
 on: [push]
 
