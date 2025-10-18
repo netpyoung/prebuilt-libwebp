@@ -54,3 +54,14 @@ libwebpmux.a 빠짐 - libwebp.a에 정적으로 포함
 ## host x86용. 안쓸꺼지만 기록용
 
 x86_64-apple-darwin
+
+## 파워쉘
+
+& 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Launch-VsDevShell.ps1' -HostArch amd64 -Arch amd64
+& 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Launch-VsDevShell.ps1' -HostArch amd64 -Arch arm64
+& 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Launch-VsDevShell.ps1' -HostArch amd64 -Arch x86
+& 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Launch-VsDevShell.ps1' -HostArch amd64 -Arch arm
+. 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Launch-VsDevShell.ps1' -HostArch amd64 -Arch amd64
+. 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Launch-VsDevShell.ps1' -HostArch amd64 -Arch arm64
+. 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Launch-VsDevShell.ps1' -HostArch amd64 -Arch x86
+. 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Launch-VsDevShell.ps1' -HostArch amd64 -Arch arm

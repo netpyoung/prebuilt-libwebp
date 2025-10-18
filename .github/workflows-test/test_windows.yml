@@ -8,7 +8,7 @@ jobs:
   upload_asset_windows:
     name: Upload Asset on Windows
     # ref: availabel image - https://github.com/actions/runner-images
-    runs-on: windows-2022
+    runs-on: windows-latest
     steps:
       # https://github.com/actions/checkout
       - name: Checkout
@@ -21,24 +21,24 @@ jobs:
             arch: x86_64
       # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepsshell
       - name: Run Buildscript - x64
-        shell: cmd
-        run: build-on-windows.bat x64
+        shell: pwsh
+        run: .\build-on-windows.ps1 x64
 
       - name: Install Dependency x86
         uses: ilammy/msvc-dev-cmd@v1
         with:
             arch: x86
       - name: Run Buildscript - x86
-        shell: cmd
-        run: build-on-windows.bat x86
+        shell: pwsh
+        run: .\build-on-windows.ps1 x86
 
-      - name: Install Dependency x86_arm64
+      - name: Install Dependency amd64_arm
         uses: ilammy/msvc-dev-cmd@v1
         with:
             arch: x86_arm64
       - name: Run Buildscript - x86_arm64
-        shell: cmd
-        run: build-on-windows.bat ARM
+        shell: pwsh
+        run: .\build-on-windows.ps1 ARM
 
 #      - name: Run Zip
 #        shell: pwsh
