@@ -10,62 +10,49 @@ jobs:
   ## ======================================================================================================
   upload_asset_windows:
     name: Upload Asset on Windows
-    runs-on: windows-2019
+    # ref: availabel image - https://github.com/actions/runner-images
+    runs-on: windows-2022
     steps:
+      # https://github.com/actions/checkout
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Install Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.3
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-
-      - name: Remove Name Conflict
-        shell: pwsh
-        run: |
-          mv C:\msys64\usr\bin\link.exe C:\msys64\usr\bin\msys-link.exe
-          mv C:\hostedtoolcache\windows\Ruby\3.3.8\x64\msys64\usr\bin\link.exe C:\hostedtoolcache\windows\Ruby\3.3.8\x64\msys64\usr\bin\msys-link.exe
-      
-      - name: Run Buildscript
-        run: bundle exec rake prepare_library_windows
-
+      # https://github.com/ilammy/msvc-dev-cmd
       - name: Install Dependency x86_64
         uses: ilammy/msvc-dev-cmd@v1
         with:
             arch: x86_64
-      - name: Run Buildscript (x86_64)
-        run: bundle exec rake update_library_windows_x64
+      # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepsshell
+      - name: Run Buildscript - x64
+        shell: cmd
+        run: build-on-windows.bat x64
 
       - name: Install Dependency x86
         uses: ilammy/msvc-dev-cmd@v1
         with:
             arch: x86
-      - name: Run Buildscript (x86)
-        run: bundle exec rake update_library_windows_x86
+      - name: Run Buildscript - x86
+        shell: cmd
+        run: build-on-windows.bat x86
 
       - name: Install Dependency x86_arm64
         uses: ilammy/msvc-dev-cmd@v1
         with:
             arch: x86_arm64
-      - name: Run Buildscript (x86_arm64)
-        run: bundle exec rake update_library_windows_arm64
+      - name: Run Buildscript - x86_arm64
+        shell: cmd
+        run: build-on-windows.bat ARM
 
-      - name: Run Zip
-        run: bundle exec rake zip_library
+#      - name: Run Zip
+#        shell: pwsh
+#        run: powershell -command "Compress-Archive -Path 'lib\windows\*' -DestinationPath 'windows.zip' -Force"
 
-      - name: Print MD5
-        run: bundle exec rake print_lib_md5
-
-      - name: Rename lib.zip
-        shell: pwsh
-        run: mv lib.zip windows.zip
-
+      # https://github.com/actions/upload-artifact
       - name: 🎁⏫ Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: artifact-windows
-          path: windows.zip
+          path: lib/windows/
           if-no-files-found: error
           retention-days: 1
           compression-level: 0
@@ -74,45 +61,38 @@ jobs:
   ## ======================================================================================================
   upload_asset_linux:
     name: Upload Asset on Linux
+    # ref: availabel image - https://github.com/actions/runner-images
     runs-on: ubuntu-latest
     steps:
+      # https://github.com/actions/checkout
       - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.3
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+        uses: actions/checkout@v5
 
       - name: Run Buildscript
-        run: |
-          bundle exec rake update_library_linux
-          bundle exec rake zip_library
+        run: ./build-on-linux.sh
 
-      - name: Print MD5
-        run: bundle exec rake print_lib_md5
-
-      - name: Rename lib.zip
-        run: mv lib.zip linux.zip
-
+      # https://github.com/actions/upload-artifact
       - name: 🎁⏫ Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: artifact-linux
-          path: linux.zip
+          path: lib/linux_64/
           if-no-files-found: error
           retention-days: 1
           compression-level: 0
 
+
   ## ======================================================================================================
   upload_asset_android:
     name: Upload Asset on Linux (Android)
+    # ref: availabel image - https://github.com/actions/runner-images
     runs-on: ubuntu-latest
     steps:
+      # https://github.com/actions/checkout
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
+      # https://github.com/nttld/setup-ndk
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
         with:
@@ -130,28 +110,15 @@ jobs:
           #   - Latest Stable Version (r28b)
           ndk-version: r28b
 
-      - name: Install Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.3
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-
       - name: Run Buildscript
-        run: |
-          bundle exec rake update_library_android
-          bundle exec rake zip_library
+        run: ./build-on-linux-android.sh
 
-      - name: Print MD5
-        run: bundle exec rake print_lib_md5
-
-      - name: Rename lib.zip
-        run: mv lib.zip android.zip
-
+      # https://github.com/actions/upload-artifact
       - name: 🎁⏫ Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: artifact-android
-          path: android.zip
+          path: lib/android/
           if-no-files-found: error
           retention-days: 1
           compression-level: 0
@@ -160,85 +127,63 @@ jobs:
   ## ======================================================================================================
   upload_asset_macos:
     name: Upload Asset on macOS
+    # ref: availabel image - https://github.com/actions/runner-images
     runs-on: macos-latest
     steps:
+      # https://github.com/actions/checkout
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Dependency
         run: brew install coreutils automake libtool
 
-      - name: Install Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.3
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-
       - name: Run Buildscript
-        run: |
-          bundle exec rake update_library_macos
-          bundle exec rake zip_library
+        run: ./build-on-mac.sh
 
-      - name: Print MD5
-        run: bundle exec rake print_lib_md5
-
-      - name: Rename lib.zip
-        run: mv lib.zip macos.zip
-
+      # https://github.com/actions/upload-artifact
       - name: 🎁⏫ Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: artifact-macos
-          path: macos.zip
+          path: lib/macOS/
           if-no-files-found: error
           retention-days: 1
           compression-level: 0
 
   ## ======================================================================================================
-  upload_asset_ios:
-    name: Upload Asset on macOS (iOS)
+  upload_asset_macos_xcframework:
+    name: Upload Asset on macOS (XCFramework)
+    # ref: availabel image - https://github.com/actions/runner-images
     runs-on: macos-latest
     steps:
+      # https://github.com/actions/checkout
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Dependency
         run: brew install coreutils automake libtool
 
-      - name: Install Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.3
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-
       - name: Run Buildscript
-        run: |
-          bundle exec rake update_library_ios
-          bundle exec rake zip_library
+        run: ./build-on-mac-xcframework.zsh
 
-      - name: Print MD5
-        run: bundle exec rake print_lib_md5
-
-      - name: Rename lib.zip
-        run: mv lib.zip ios.zip
-
+      # https://github.com/actions/upload-artifact
       - name: 🎁⏫ Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: artifact-ios
-          path: ios.zip
+          name: artifact-macos-xcframework
+          path: lib/macOS_xcframework/
           if-no-files-found: error
           retention-days: 1
           compression-level: 0
 
   ## ======================================================================================================
   release:
-    needs: [upload_asset_windows, upload_asset_linux, upload_asset_android, upload_asset_macos, upload_asset_ios]
+    needs: [upload_asset_windows, upload_asset_linux, upload_asset_android, upload_asset_macos, upload_asset_macos_xcframework]
     name: Write Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
@@ -248,10 +193,21 @@ jobs:
         run: |
           mkdir -p download-artifacts
 
+      # https://github.com/actions/download-artifact
       - name: 🎁⏬ Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: download-artifacts
+
+      - name: 📦 Zip Artifacts
+        run: |
+          cd download-artifacts
+          
+          zip -r android.zip           artifact-android/
+          zip -r linux.zip             artifact-linux/
+          zip -r windows.zip           artifact-windows/
+          zip -r macos.zip             artifact-macos/
+          zip -r macos-xcframework.zip artifact-macos-xcframework/
 
       - name: Log artifact download
         run: |
@@ -271,8 +227,9 @@ jobs:
           version: ${{ steps.tag_name.outputs.current_version }}
           path: ./CHANGELOG.md
 
+      # https://github.com/softprops/action-gh-release
       - name: 🚀 Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           draft: true
           prerelease: false
@@ -281,9 +238,9 @@ jobs:
           body: ${{ steps.changelog_reader.outputs.changes }}
           fail_on_unmatched_files: true
           files: |
-            ./download-artifacts/artifact-android/android.zip
-            ./download-artifacts/artifact-linux/linux.zip
-            ./download-artifacts/artifact-windows/windows.zip
-            ./download-artifacts/artifact-macos/macos.zip
-            ./download-artifacts/artifact-ios/ios.zip
+            ./download-artifacts/android.zip
+            ./download-artifacts/linux.zip
+            ./download-artifacts/windows.zip
+            ./download-artifacts/macos.zip
+            ./download-artifacts/macos-xcframework.zip
 
