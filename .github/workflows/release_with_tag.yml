@@ -177,8 +177,42 @@ jobs:
           compression-level: 0
 
   ## ======================================================================================================
+  upload_asset_linux_wasm:
+    name: Upload Asset on Linux (wasm)
+    # ref: availabel image - https://github.com/actions/runner-images
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/actions/checkout
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install Dependency
+        run: |
+          sudo apt update
+          sudo apt install -y git python3 cmake build-essential
+
+      # https://github.com/mymindstorm/setup-emsdk
+      - name: Setup emsdk
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          actions-cache-folder: 'emsdk-cache'
+
+      - name: Run Buildscript
+        run: ./build-on-linux-wasm.sh
+
+      # https://github.com/actions/upload-artifact
+      - name: 🎁⏫ Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-wasm
+          path: lib/wasm/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  ## ======================================================================================================
   release:
-    needs: [upload_asset_windows, upload_asset_linux, upload_asset_android, upload_asset_macos, upload_asset_macos_xcframework]
+    needs: [upload_asset_windows, upload_asset_linux, upload_asset_linux_wasm, upload_asset_android, upload_asset_macos, upload_asset_macos_xcframework]
     name: Write Release
     runs-on: ubuntu-latest
     steps:
@@ -204,6 +238,7 @@ jobs:
           cd download-artifacts
           
           zip -r android.zip           artifact-android/
+          zip -r wasm.zip              artifact-wasm/
           zip -r linux.zip             artifact-linux/
           zip -r windows.zip           artifact-windows/
           zip -r macos.zip             artifact-macos/
@@ -239,6 +274,7 @@ jobs:
           fail_on_unmatched_files: true
           files: |
             ./download-artifacts/android.zip
+            ./download-artifacts/wasm.zip
             ./download-artifacts/linux.zip
             ./download-artifacts/windows.zip
             ./download-artifacts/macos.zip
