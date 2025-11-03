@@ -14,13 +14,13 @@
 | Linux     | x86_64      | o       | not yet        |
 | macOS     | x86_64      | o       | tested         |
 | iOS       | 64bit       | o       | not yet        |
-| tvOS      | 64bit       | x       | not yet        |
+| tvOS      | 64bit       | o       | not yet        |
 | Android   | armeabi-v7a | o       | not yet        |
 | Android   | arm64_v8a   | o       | not yet        |
 | Android   | x86         | o       | not yet        |
 | Android   | x86_64      | o       | not yet        |
+| WebGL     | wasm        | o       | not yet        |
 | Linux     | x86         | no plan | not yet        |
-| WebGL     | .           | no plan | not yet        |
 | Other     | .           | no plan | not yet        |
 
 ## Preface

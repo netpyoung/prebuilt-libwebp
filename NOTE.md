@@ -65,3 +65,62 @@ x86_64-apple-darwin
 . 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Launch-VsDevShell.ps1' -HostArch amd64 -Arch arm64
 . 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Launch-VsDevShell.ps1' -HostArch amd64 -Arch x86
 . 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Launch-VsDevShell.ps1' -HostArch amd64 -Arch arm
+
+
+
+
+
+
+
+# emcmake cmake -LH .
+# emcmake cmake -LA . | grep WEBP_BUILD
+
+# https://github.com/WebAssembly/wabtd
+# https://github.com/WebAssembly/binaryen
+
+# wasm-objdump
+
+# https://docs.unity3d.com/6000.2/Documentation/Manual/webgl-server-configuration-code-samples.html
+
+
+
+:{$http_port:80} {
+    root * ./
+    file_server
+
+	# BROTLI
+    @BROTLI_data_br path *.data.br
+    header @BROTLI_data_br Content-Encoding br
+    header @BROTLI_data_br Content-Type application/octet-stream
+
+    @BROTLI_js_br path *.js.br
+    header @BROTLI_js_br Content-Encoding br
+    header @BROTLI_js_br Content-Type application/javascript
+
+    @BROTLI_wasm_br path *.wasm.br
+    header @BROTLI_wasm_br Content-Encoding br
+    header @BROTLI_wasm_br Content-Type application/wasm
+
+	# GZIP
+    @GZIP_data_gz path *.data.gz
+    header @GZIP_data_gz Content-Encoding gzip
+    header @GZIP_data_gz Content-Type application/octet-stream
+
+    @GZIP_js_gz path *.js.gz
+    header @GZIP_js_gz Content-Encoding gzip
+    header @GZIP_js_gz Content-Type application/javascript
+
+    @GZIP_wasm_gz path *.wasm.gz
+    header @GZIP_wasm_gz Content-Encoding gzip
+    header @GZIP_wasm_gz Content-Type application/wasm
+}
+
+
+# aws 에서는 --content-encoding br --content-type application/wasm
+
+# aws s3 cp Build_1.js.gz s3://mybucket/Build_1.js.gz \
+#   --content-encoding gzip \
+#   --content-type application/javascript
+# HTTP Response Header "Content-Type" configured incorrectly on the server for file Build/Build_c.wasm.br , should be "application/wasm". Startup time performance will suffer.
+
+# cmd /c "set http_port=3000 && caddy run"
